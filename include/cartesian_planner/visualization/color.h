@@ -3,21 +3,21 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
 
 #pragma once
 
-#include <string>
-#include <algorithm>
-#include <sstream>
-#include <cstdio>
-#include <cmath>
-
 #include <std_msgs/ColorRGBA.h>
+
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <sstream>
+#include <string>
 
 using std_msgs::ColorRGBA;
 
@@ -25,14 +25,15 @@ namespace cartesian_planner {
 namespace visualization {
 
 class Color {
-public:
+ public:
   Color() = default;
 
   Color(float r, float g, float b) : r_(r), g_(g), b_(b), a_(1.0) {}
 
   std::string toPlotColor() const {
     char buf[10];
-    snprintf(buf, 10, "#%02x%02x%02x", uint8_t(r_ * 255), uint8_t(g_ * 255), uint8_t(b_ * 255));
+    snprintf(buf, 10, "#%02x%02x%02x", uint8_t(r_ * 255), uint8_t(g_ * 255),
+             uint8_t(b_ * 255));
     return buf;
   }
 
@@ -78,7 +79,7 @@ public:
   \param fV Hue component, used as output, range: [0, 1]
 
 */
-  void toHSV(float &fH, float &fS, float &fV) const;
+  void toHSV(float& fH, float& fS, float& fV) const;
 
   inline double r() { return r_; }
 
@@ -86,15 +87,11 @@ public:
 
   inline double b() { return b_; }
 
-  inline void set_alpha(double alpha) {
-    a_ = alpha;
-  }
+  inline void set_alpha(double alpha) { a_ = alpha; }
 
-
-private:
+ private:
   double r_, g_, b_, a_;
-
 };
 
-}
-}
+}  // namespace visualization
+}  // namespace cartesian_planner

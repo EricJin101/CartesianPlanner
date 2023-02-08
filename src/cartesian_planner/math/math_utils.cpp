@@ -16,8 +16,9 @@
 
 #include "cartesian_planner/math/math_utils.h"
 
-#define  _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #include <math.h>
+
 #include <utility>
 
 namespace cartesian_planner {
@@ -68,8 +69,7 @@ double Gaussian(const double u, const double std, const double x) {
          std::exp(-(x - u) * (x - u) / (2 * std * std));
 }
 
-Vec2d RotateVector2d(const Vec2d& v_in,
-                               const double theta) {
+Vec2d RotateVector2d(const Vec2d& v_in, const double theta) {
   const double cos_theta = std::cos(theta);
   const double sin_theta = std::sin(theta);
 
@@ -85,18 +85,18 @@ std::pair<double, double> Cartesian2Polar(double x, double y) {
   return std::make_pair(r, theta);
 }
 
-std::vector<double> ToContinuousAngle(const std::vector<double> &angle) {
+std::vector<double> ToContinuousAngle(const std::vector<double>& angle) {
   std::vector<double> ret;
   ret = angle;
   for (size_t i = 1; i < ret.size(); i++) {
-    while(ret[i] - ret[i-1] > M_PI + 0.001)
+    while (ret[i] - ret[i - 1] > M_PI + 0.001)
       ret[i] = ret[i] - 2 * M_PI;
 
-    while(ret[i] - ret[i-1] < -M_PI- 0.001)
+    while (ret[i] - ret[i - 1] < -M_PI - 0.001)
       ret[i] = ret[i] + 2 * M_PI;
   }
   return ret;
 }
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

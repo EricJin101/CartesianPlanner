@@ -3,20 +3,22 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
 
 #include "cartesian_planner/discretized_trajectory.h"
-#include "cartesian_planner/math/math_utils.h"
 
 #include <algorithm>
 
+#include "cartesian_planner/math/math_utils.h"
+
 namespace cartesian_planner {
 
-DiscretizedTrajectory::DiscretizedTrajectory(const DiscretizedTrajectory &rhs, size_t begin, size_t end) {
+DiscretizedTrajectory::DiscretizedTrajectory(const DiscretizedTrajectory& rhs,
+                                             size_t begin, size_t end) {
   if (end < 0) {
     end = rhs.data_.size();
   }
@@ -33,13 +35,13 @@ DiscretizedTrajectory::QueryLowerBoundStationPoint(double station) const {
   }
 
   return std::lower_bound(
-    data_.begin(), data_.end(), station,
-    [](const TrajectoryPoint &t, double station) {
-      return t.s < station;
-    });
+      data_.begin(), data_.end(), station,
+      [](const TrajectoryPoint& t, double station) { return t.s < station; });
 }
 
-TrajectoryPoint LinearInterpolateTrajectory(const TrajectoryPoint &p0, const TrajectoryPoint &p1, double s) {
+TrajectoryPoint LinearInterpolateTrajectory(const TrajectoryPoint& p0,
+                                            const TrajectoryPoint& p1,
+                                            double s) {
   double s0 = p0.s;
   double s1 = p1.s;
   if (std::abs(s1 - s0) < math::kMathEpsilon) {
@@ -73,7 +75,8 @@ TrajectoryPoint DiscretizedTrajectory::EvaluateStation(double station) const {
 }
 
 DiscretizedTrajectory::DataType::const_iterator
-DiscretizedTrajectory::QueryNearestPoint(const Vec2d &point, double *out_distance) const {
+DiscretizedTrajectory::QueryNearestPoint(const Vec2d& point,
+                                         double* out_distance) const {
   auto nearest_iter = data_.begin();
   double nearest_distance = std::numeric_limits<double>::max();
 
@@ -92,11 +95,11 @@ DiscretizedTrajectory::QueryNearestPoint(const Vec2d &point, double *out_distanc
   return nearest_iter;
 }
 
-Vec2d DiscretizedTrajectory::GetProjection(const Vec2d &xy) const {
+Vec2d DiscretizedTrajectory::GetProjection(const Vec2d& xy) const {
   long point_idx = std::distance(data_.begin(), QueryNearestPoint(xy));
   auto project_point = data_[point_idx];
   auto index_start = std::max(0l, point_idx - 1);
-  auto index_end = std::min(data_.size() - 1, (ulong) point_idx + 1);
+  auto index_end = std::min(data_.size() - 1, (ulong)point_idx + 1);
 
   if (index_start < index_end) {
     double v0x = xy.x() - data_[index_start].x;
@@ -109,17 +112,21 @@ Vec2d DiscretizedTrajectory::GetProjection(const Vec2d &xy) const {
     double dot = v0x * v1x + v0y * v1y;
 
     double delta_s = dot / v1_norm;
-    project_point = LinearInterpolateTrajectory(data_[index_start], data_[index_end], data_[index_start].s + delta_s);
+    project_point = LinearInterpolateTrajectory(
+        data_[index_start], data_[index_end], data_[index_start].s + delta_s);
   }
 
   double nr_x = xy.x() - project_point.x, nr_y = xy.y() - project_point.y;
-  double lateral = copysign(hypot(nr_x, nr_y), nr_y * cos(project_point.theta) - nr_x * sin(project_point.theta));
+  double lateral =
+      copysign(hypot(nr_x, nr_y), nr_y * cos(project_point.theta) -
+                                      nr_x * sin(project_point.theta));
   return {project_point.s, lateral};
 }
 
-Vec2d DiscretizedTrajectory::GetCartesian(double station, double lateral) const {
+Vec2d DiscretizedTrajectory::GetCartesian(double station,
+                                          double lateral) const {
   auto ref = EvaluateStation(station);
   return {ref.x - lateral * sin(ref.theta), ref.y + lateral * cos(ref.theta)};
 }
 
-}
+}  // namespace cartesian_planner

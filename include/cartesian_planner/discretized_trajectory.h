@@ -3,17 +3,17 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
 
 #pragma once
 
+#include <cassert>
 #include <utility>
 #include <vector>
-#include <cassert>
 
 #include "cartesian_planner/math/vec2d.h"
 
@@ -40,30 +40,32 @@ using math::Vec2d;
  * Discretized Trajectory
  */
 class DiscretizedTrajectory {
-public:
+ public:
   typedef std::vector<TrajectoryPoint> DataType;
 
   DiscretizedTrajectory() = default;
 
-  DiscretizedTrajectory(const DiscretizedTrajectory &rhs, size_t begin, size_t end = -1);
+  DiscretizedTrajectory(const DiscretizedTrajectory& rhs, size_t begin,
+                        size_t end = -1);
 
-  explicit DiscretizedTrajectory(std::vector<TrajectoryPoint> points) : data_(std::move(points)) {}
+  explicit DiscretizedTrajectory(std::vector<TrajectoryPoint> points)
+      : data_(std::move(points)) {}
 
-  inline const DataType &data() const { return data_; }
+  inline const DataType& data() const { return data_; }
 
   DataType::const_iterator QueryLowerBoundStationPoint(double station) const;
 
-  DataType::const_iterator QueryNearestPoint(const Vec2d &point, double *out_distance = nullptr) const;
+  DataType::const_iterator QueryNearestPoint(
+      const Vec2d& point, double* out_distance = nullptr) const;
 
   TrajectoryPoint EvaluateStation(double station) const;
 
-  Vec2d GetProjection(const Vec2d &xy) const;
+  Vec2d GetProjection(const Vec2d& xy) const;
 
   Vec2d GetCartesian(double station, double lateral) const;
 
-
-protected:
+ protected:
   std::vector<TrajectoryPoint> data_;
 };
 
-}
+}  // namespace cartesian_planner

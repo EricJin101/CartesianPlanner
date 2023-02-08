@@ -3,29 +3,29 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
 
 #pragma once
 
-#include <tuple>
-#include <limits>
 #include <cmath>
+#include <limits>
 #include <memory>
+#include <tuple>
 
+#include "cartesian_planner_config.h"
+#include "environment.h"
+#include "math/polygon2d.h"
 #include "math/pose.h"
 #include "math/vec2d.h"
-#include "math/polygon2d.h"
-#include "environment.h"
-#include "cartesian_planner_config.h"
 
 namespace cartesian_planner {
+using math::Polygon2d;
 using math::Pose;
 using math::Vec2d;
-using math::Polygon2d;
 
 const double Inf = std::numeric_limits<double>::max();
 const double NInf = std::numeric_limits<double>::min();
@@ -35,12 +35,13 @@ constexpr int NS = 7;
 constexpr int NL = 10;
 
 class DpPlanner {
-public:
-  DpPlanner(const CartesianPlannerConfig &config, const Env &env);
+ public:
+  DpPlanner(const CartesianPlannerConfig& config, const Env& env);
 
-  bool Plan(double start_x, double start_y, double start_theta, DiscretizedTrajectory &result);
+  bool Plan(double start_x, double start_y, double start_theta,
+            DiscretizedTrajectory& result);
 
-private:
+ private:
   struct StateCell {
     double cost = Inf;
     double current_s = NInf;
@@ -50,7 +51,10 @@ private:
     StateCell() = default;
 
     StateCell(double cost, double cur_s, int parent_s_ind, int parent_l_ind)
-      : cost(cost), current_s(cur_s), parent_s_ind(parent_s_ind), parent_l_ind(parent_l_ind) {}
+        : cost(cost),
+          current_s(cur_s),
+          parent_s_ind(parent_s_ind),
+          parent_l_ind(parent_l_ind) {}
   };
 
   struct StateIndex {
@@ -86,7 +90,8 @@ private:
   std::pair<double, double> GetCost(StateIndex parent_ind, StateIndex cur_ind);
 
   double GetLateralOffset(double s, int l_ind) {
-    if (l_ind == NL - 1) return 0.0;
+    if (l_ind == NL - 1)
+      return 0.0;
 
     auto ref = env_->reference().EvaluateStation(s);
     double lb = -ref.right_bound + safe_margin_;
@@ -95,8 +100,8 @@ private:
     return lb + (ub - lb) * lateral_[l_ind];
   }
 
-  std::vector<Vec2d> InterpolateLinearly(double parent_s, int parent_l_ind, int cur_s_ind, int cur_l_ind);
+  std::vector<Vec2d> InterpolateLinearly(double parent_s, int parent_l_ind,
+                                         int cur_s_ind, int cur_l_ind);
 };
 
-
-}
+}  // namespace cartesian_planner

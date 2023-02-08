@@ -3,8 +3,8 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
@@ -13,13 +13,13 @@
 
 #include <tuple>
 
-#include "math/pose.h"
 #include "math/box2d.h"
+#include "math/pose.h"
 
 namespace cartesian_planner {
 
 class VehicleParam {
-public:
+ public:
   /**
    * L_F, front hang length of the ego vehicle (m)
    */
@@ -75,8 +75,9 @@ public:
     f2x = 0.75 * length - rear_hang_length;
   }
 
-  template<class T>
-  std::tuple<T, T, T, T> GetDiscPositions(const T &x, const T &y, const T &theta) const {
+  template <class T>
+  std::tuple<T, T, T, T> GetDiscPositions(const T& x, const T& y,
+                                          const T& theta) const {
     auto xf = x + f2x * cos(theta);
     auto xr = x + r2x * cos(theta);
     auto yf = y + f2x * sin(theta);
@@ -84,11 +85,10 @@ public:
     return std::make_tuple(xf, yf, xr, yr);
   }
 
-  math::Box2d GenerateBox(const math::Pose &pose) const {
+  math::Box2d GenerateBox(const math::Pose& pose) const {
     double length = (wheel_base + rear_hang_length + front_hang_length);
     double distance = length / 2 - rear_hang_length;
     return {pose.extend(distance), pose.theta(), length, width};
   }
-
 };
-}
+}  // namespace cartesian_planner

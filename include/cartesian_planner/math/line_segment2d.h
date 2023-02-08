@@ -38,7 +38,7 @@ namespace math {
  * @brief Line segment in 2-D.
  */
 class LineSegment2d {
-public:
+ public:
   /**
    * @brief Empty constructor.
    */
@@ -49,25 +49,25 @@ public:
    * @param start The start point of the line segment.
    * @param end The end point of the line segment.
    */
-  LineSegment2d(const Vec2d &start, const Vec2d &end);
+  LineSegment2d(const Vec2d& start, const Vec2d& end);
 
   /**
    * @brief Get the start point.
    * @return The start point of the line segment.
    */
-  const Vec2d &start() const { return start_; }
+  const Vec2d& start() const { return start_; }
 
   /**
    * @brief Get the end point.
    * @return The end point of the line segment.
    */
-  const Vec2d &end() const { return end_; }
+  const Vec2d& end() const { return end_; }
 
   /**
    * @brief Get the unit direction from the start point to the end point.
    * @return The start point of the line segment.
    */
-  const Vec2d &unit_direction() const { return unit_direction_; }
+  const Vec2d& unit_direction() const { return unit_direction_; }
 
   /**
    * @brief Get the center of the line segment.
@@ -111,7 +111,7 @@ public:
    */
   double length_sqr() const;
 
-  double DistanceToRay(const Vec2d &ray_origin, double ray_direction);
+  double DistanceToRay(const Vec2d& ray_origin, double ray_direction);
 
   /**
    * @brief Compute the shortest distance from a point on the line segment
@@ -119,7 +119,7 @@ public:
    * @param point The point to compute the distance to.
    * @return The shortest distance from points on the line segment to point.
    */
-  double DistanceTo(const Vec2d &point) const;
+  double DistanceTo(const Vec2d& point) const;
 
   /**
    * @brief Compute the shortest distance from a point on the line segment
@@ -130,7 +130,7 @@ public:
    * @return The shortest distance from points on the line segment
    *         to the input point.
    */
-  double DistanceTo(const Vec2d &point, Vec2d *const nearest_pt) const;
+  double DistanceTo(const Vec2d& point, Vec2d* const nearest_pt) const;
 
   /**
    * @brief Compute the square of the shortest distance from a point
@@ -139,7 +139,7 @@ public:
    * @return The square of the shortest distance from points
    *         on the line segment to the input point.
    */
-  double DistanceSquareTo(const Vec2d &point) const;
+  double DistanceSquareTo(const Vec2d& point) const;
 
   /**
    * @brief Compute the square of the shortest distance from a point
@@ -151,14 +151,14 @@ public:
    * @return The shortest distance from points on the line segment
    *         to the input point.
    */
-  double DistanceSquareTo(const Vec2d &point, Vec2d *const nearest_pt) const;
+  double DistanceSquareTo(const Vec2d& point, Vec2d* const nearest_pt) const;
 
   /**
    * @brief Check if a point is within the line segment.
    * @param point The point to check if it is within the line segment.
    * @return Whether the input point is within the line segment or not.
    */
-  bool IsPointIn(const Vec2d &point) const;
+  bool IsPointIn(const Vec2d& point) const;
 
   /**
    * @brief Check if the line segment has an intersect
@@ -167,7 +167,7 @@ public:
    * @return Whether the line segment has an intersect
    *         with the input other_segment.
    */
-  bool HasIntersect(const LineSegment2d &other_segment) const;
+  bool HasIntersect(const LineSegment2d& other_segment) const;
 
   /**
    * @brief Compute the intersect with another line segment in 2-D if any.
@@ -177,8 +177,8 @@ public:
    * @return Whether the line segment has an intersect
    *         with the input other_segment.
    */
-  bool GetIntersect(const LineSegment2d &other_segment,
-                    Vec2d *const point) const;
+  bool GetIntersect(const LineSegment2d& other_segment,
+                    Vec2d* const point) const;
 
   /**
    * @brief Compute the projection of a vector onto the line segment.
@@ -187,7 +187,7 @@ public:
    * @return The projection of the vector, which is from the start point of
    *         the line segment to the input point, onto the unit direction.
    */
-  double ProjectOntoUnit(const Vec2d &point) const;
+  double ProjectOntoUnit(const Vec2d& point) const;
 
   /**
    * @brief Compute the cross product of a vector onto the line segment.
@@ -197,7 +197,7 @@ public:
    *         the vector, which is from the start point of
    *         the line segment to the input point.
    */
-  double ProductOntoUnit(const Vec2d &point) const;
+  double ProductOntoUnit(const Vec2d& point) const;
 
   /**
    * @brief Compute perpendicular foot of a point in 2-D on the straight line
@@ -207,8 +207,8 @@ public:
    *        the straight line expanded from the line segment.
    * @return The distance from the input point to the perpendicular foot.
    */
-  double GetPerpendicularFoot(const Vec2d &point,
-                              Vec2d *const foot_point) const;
+  double GetPerpendicularFoot(const Vec2d& point,
+                              Vec2d* const foot_point) const;
 
   inline std::vector<Vec2d> SamplePoints(int num) {
     return SamplePoints(length_ / (num - 1));
@@ -216,14 +216,13 @@ public:
 
   std::vector<Vec2d> SamplePoints(double step);
 
-
   /**
    * @brief Get the debug string including the essential information.
    * @return Information of the line segment for debugging.
    */
   std::string DebugString() const;
 
-private:
+ private:
   Vec2d start_;
   Vec2d end_;
   Vec2d unit_direction_;
@@ -232,4 +231,4 @@ private:
 };
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

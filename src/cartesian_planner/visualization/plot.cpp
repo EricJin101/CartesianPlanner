@@ -3,8 +3,8 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
@@ -19,15 +19,16 @@ std::mutex mutex_;
 
 ros::Publisher publisher_;
 visualization_msgs::MarkerArray arr_;
-}
+}  // namespace
 
-void Init(ros::NodeHandle &node, const std::string &frame, const std::string &topic) {
+void Init(ros::NodeHandle& node, const std::string& frame,
+          const std::string& topic) {
   frame_ = frame;
   publisher_ = node.advertise<visualization_msgs::MarkerArray>(topic, 10, true);
 }
 
-void
-Plot(const Vector &xs, const Vector &ys, double width, Color color, int id, const std::string &ns) {
+void Plot(const Vector& xs, const Vector& ys, double width, Color color, int id,
+          const std::string& ns) {
   visualization_msgs::Marker msg;
   msg.header.frame_id = frame_;
   msg.header.stamp = ros::Time();
@@ -53,8 +54,8 @@ Plot(const Vector &xs, const Vector &ys, double width, Color color, int id, cons
   mutex_.unlock();
 }
 
-void Plot(const Vector &xs, const Vector &ys, double width,
-          const std::vector<Color> &color, int id, const std::string &ns) {
+void Plot(const Vector& xs, const Vector& ys, double width,
+          const std::vector<Color>& color, int id, const std::string& ns) {
   assert(xs.size() == color.size());
 
   visualization_msgs::Marker msg;
@@ -81,9 +82,8 @@ void Plot(const Vector &xs, const Vector &ys, double width,
   mutex_.unlock();
 }
 
-
-void PlotPolygon(const Vector &xs, const Vector &ys, double width, Color color, int id,
-                 const std::string &ns) {
+void PlotPolygon(const Vector& xs, const Vector& ys, double width, Color color,
+                 int id, const std::string& ns) {
   auto xxs = xs;
   auto yys = ys;
   xxs.push_back(xxs[0]);
@@ -91,18 +91,19 @@ void PlotPolygon(const Vector &xs, const Vector &ys, double width, Color color, 
   Plot(xxs, yys, width, color, id, ns);
 }
 
-void PlotPolygon(const Polygon2d &polygon, double width, Color color, int id,
-                 const std::string &ns) {
+void PlotPolygon(const Polygon2d& polygon, double width, Color color, int id,
+                 const std::string& ns) {
   std::vector<double> xs, ys;
-  for (auto &pt: polygon.points()) {
+  for (auto& pt : polygon.points()) {
     xs.push_back(pt.x());
     ys.push_back(pt.y());
   }
   PlotPolygon(xs, ys, width, color, id, ns);
 }
 
-void PlotTrajectory(const Vector &xs, const Vector &ys, const Vector &vs, double max_velocity, double width,
-                    const Color &color, int id, const std::string &ns) {
+void PlotTrajectory(const Vector& xs, const Vector& ys, const Vector& vs,
+                    double max_velocity, double width, const Color& color,
+                    int id, const std::string& ns) {
   std::vector<Color> colors(xs.size());
   float h, tmp;
   color.toHSV(h, tmp, tmp);
@@ -115,8 +116,8 @@ void PlotTrajectory(const Vector &xs, const Vector &ys, const Vector &vs, double
   Plot(xs, ys, width, colors, id, ns);
 }
 
-void PlotPoints(const Vector &xs, const Vector &ys, double width, const Color &color, int id,
-                const std::string &ns) {
+void PlotPoints(const Vector& xs, const Vector& ys, double width,
+                const Color& color, int id, const std::string& ns) {
   assert(xs.size() == ys.size());
 
   visualization_msgs::Marker msg;
@@ -164,5 +165,5 @@ void Clear() {
   publisher_.publish(arr);
   mutex_.unlock();
 }
-}
-}
+}  // namespace visualization
+}  // namespace cartesian_planner

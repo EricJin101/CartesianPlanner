@@ -21,12 +21,12 @@
 
 #pragma once
 
+#include <array>
 #include <cmath>
 #include <limits>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <array>
 
 #include "vec2d.h"
 
@@ -48,8 +48,8 @@ double Sqr(const double x);
  *
  * @return The cross product result.
  */
-double CrossProd(const Vec2d &start_point, const Vec2d &end_point_1,
-                 const Vec2d &end_point_2);
+double CrossProd(const Vec2d& start_point, const Vec2d& end_point_1,
+                 const Vec2d& end_point_2);
 
 /**
  * @brief Inner product between two 2-D vectors from the common start point,
@@ -60,8 +60,8 @@ double CrossProd(const Vec2d &start_point, const Vec2d &end_point_1,
  *
  * @return The inner product result.
  */
-double InnerProd(const Vec2d &start_point, const Vec2d &end_point_1,
-                 const Vec2d &end_point_2);
+double InnerProd(const Vec2d& start_point, const Vec2d& end_point_1,
+                 const Vec2d& end_point_2);
 
 /**
  * @brief Cross product between two vectors.
@@ -152,7 +152,7 @@ double Gaussian(const double u, const double std, const double x);
 inline double Sigmoid(const double x) { return 1.0 / (1.0 + std::exp(-x)); }
 
 // Rotate a 2d vector counter-clockwise by theta
-Vec2d RotateVector2d(const Vec2d &v_in, const double theta);
+Vec2d RotateVector2d(const Vec2d& v_in, const double theta);
 
 inline std::pair<double, double> RFUToFLU(const double x, const double y) {
   return std::make_pair(y, -x);
@@ -162,7 +162,7 @@ inline std::pair<double, double> FLUToRFU(const double x, const double y) {
   return std::make_pair(-y, x);
 }
 
-inline void L2Norm(int feat_dim, float *feat_data) {
+inline void L2Norm(int feat_dim, float* feat_data) {
   if (feat_dim == 0) {
     return;
   }
@@ -195,7 +195,7 @@ inline void L2Norm(int feat_dim, float *feat_data) {
  * @return Interpolated point.
  */
 template <typename T>
-T lerp(const T &x0, const double t0, const T &x1, const double t1,
+T lerp(const T& x0, const double t0, const T& x1, const double t1,
        const double t) {
   if (std::abs(t1 - t0) <= 1.0e-6) {
     return x0;
@@ -205,8 +205,8 @@ T lerp(const T &x0, const double t0, const T &x1, const double t1,
   return x;
 }
 
-inline double slerp(const double a0, const double t0, const double a1, const double t1,
-             const double t) {
+inline double slerp(const double a0, const double t0, const double a1,
+                    const double t1, const double t) {
   if (std::abs(t1 - t0) <= kMathEpsilon) {
     return NormalizeAngle(a0);
   }
@@ -234,19 +234,18 @@ almost_equal(T x, T y, int ulp) {
   // and multiplied by the desired precision in ULPs (units in the last place)
   // unless the result is subnormal
   return std::fabs(x - y) <=
-         std::numeric_limits<T>::epsilon() * std::fabs(x + y) * ulp ||
+             std::numeric_limits<T>::epsilon() * std::fabs(x + y) * ulp ||
          std::fabs(x - y) < std::numeric_limits<T>::min();
 }
 
-std::vector<double> ToContinuousAngle(const std::vector<double> &angle);
+std::vector<double> ToContinuousAngle(const std::vector<double>& angle);
 
-
-template<int N>
+template <int N>
 inline std::array<double, N> LinSpaced(double start, double end) {
   std::array<double, N> res;
   double step = (end - start) / (N - 1);
 
-  for(int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++) {
     res[i] = start + step * i;
   }
 
@@ -257,7 +256,7 @@ inline std::vector<double> LinSpaced(double start, double end, int count) {
   std::vector<double> res(count, 0);
   double step = (end - start) / (count - 1);
 
-  for(int i = 0; i < count; i++) {
+  for (int i = 0; i < count; i++) {
     res[i] = start + step * i;
   }
 
@@ -267,9 +266,9 @@ inline std::vector<double> LinSpaced(double start, double end, int count) {
 inline std::vector<double> ARange(double start, double end, double step) {
   std::vector<double> res;
 
-  for(int i = 0; ; i++) {
+  for (int i = 0;; i++) {
     auto val = start + step * i;
-    if(val > end) {
+    if (val > end) {
       break;
     }
     res.push_back(val);
@@ -279,4 +278,4 @@ inline std::vector<double> ARange(double start, double end, double step) {
 }
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

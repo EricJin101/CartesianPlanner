@@ -17,8 +17,8 @@
 #include "cartesian_planner/math/line_segment2d.h"
 
 #include <algorithm>
-#include <utility>
 #include <cassert>
+#include <utility>
 
 #include "cartesian_planner/math/math_utils.h"
 
@@ -37,7 +37,7 @@ bool IsWithin(double val, double bound1, double bound2) {
 
 LineSegment2d::LineSegment2d() { unit_direction_ = Vec2d(1, 0); }
 
-LineSegment2d::LineSegment2d(const Vec2d &start, const Vec2d &end)
+LineSegment2d::LineSegment2d(const Vec2d& start, const Vec2d& end)
     : start_(start), end_(end) {
   const double dx = end_.x() - start_.x();
   const double dy = end_.y() - start_.y();
@@ -58,7 +58,7 @@ double LineSegment2d::length() const { return length_; }
 
 double LineSegment2d::length_sqr() const { return length_ * length_; }
 
-double LineSegment2d::DistanceTo(const Vec2d &point) const {
+double LineSegment2d::DistanceTo(const Vec2d& point) const {
   if (length_ <= kMathEpsilon) {
     return point.DistanceTo(start_);
   }
@@ -74,8 +74,8 @@ double LineSegment2d::DistanceTo(const Vec2d &point) const {
   return std::abs(x0 * unit_direction_.y() - y0 * unit_direction_.x());
 }
 
-double LineSegment2d::DistanceTo(const Vec2d &point,
-                                 Vec2d *const nearest_pt) const {
+double LineSegment2d::DistanceTo(const Vec2d& point,
+                                 Vec2d* const nearest_pt) const {
   assert(nearest_pt);
   if (length_ <= kMathEpsilon) {
     *nearest_pt = start_;
@@ -96,7 +96,7 @@ double LineSegment2d::DistanceTo(const Vec2d &point,
   return std::abs(x0 * unit_direction_.y() - y0 * unit_direction_.x());
 }
 
-double LineSegment2d::DistanceSquareTo(const Vec2d &point) const {
+double LineSegment2d::DistanceSquareTo(const Vec2d& point) const {
   if (length_ <= kMathEpsilon) {
     return point.DistanceSquareTo(start_);
   }
@@ -112,7 +112,8 @@ double LineSegment2d::DistanceSquareTo(const Vec2d &point) const {
   return Square(x0 * unit_direction_.y() - y0 * unit_direction_.x());
 }
 
-double LineSegment2d::DistanceToRay(const Vec2d &ray_origin, double ray_direction) {
+double LineSegment2d::DistanceToRay(const Vec2d& ray_origin,
+                                    double ray_direction) {
   auto v1 = ray_origin - start_;
   auto v2 = end_ - start_;
   Vec2d v3(-sin(ray_direction), cos(ray_direction));
@@ -130,8 +131,8 @@ double LineSegment2d::DistanceToRay(const Vec2d &ray_origin, double ray_directio
   return -1.0;
 }
 
-double LineSegment2d::DistanceSquareTo(const Vec2d &point,
-                                       Vec2d *const nearest_pt) const {
+double LineSegment2d::DistanceSquareTo(const Vec2d& point,
+                                       Vec2d* const nearest_pt) const {
   assert(nearest_pt);
   if (length_ <= kMathEpsilon) {
     *nearest_pt = start_;
@@ -152,7 +153,7 @@ double LineSegment2d::DistanceSquareTo(const Vec2d &point,
   return Square(x0 * unit_direction_.y() - y0 * unit_direction_.x());
 }
 
-bool LineSegment2d::IsPointIn(const Vec2d &point) const {
+bool LineSegment2d::IsPointIn(const Vec2d& point) const {
   if (length_ <= kMathEpsilon) {
     return std::abs(point.x() - start_.x()) <= kMathEpsilon &&
            std::abs(point.y() - start_.y()) <= kMathEpsilon;
@@ -165,21 +166,21 @@ bool LineSegment2d::IsPointIn(const Vec2d &point) const {
          IsWithin(point.y(), start_.y(), end_.y());
 }
 
-double LineSegment2d::ProjectOntoUnit(const Vec2d &point) const {
+double LineSegment2d::ProjectOntoUnit(const Vec2d& point) const {
   return unit_direction_.InnerProd(point - start_);
 }
 
-double LineSegment2d::ProductOntoUnit(const Vec2d &point) const {
+double LineSegment2d::ProductOntoUnit(const Vec2d& point) const {
   return unit_direction_.CrossProd(point - start_);
 }
 
-bool LineSegment2d::HasIntersect(const LineSegment2d &other_segment) const {
+bool LineSegment2d::HasIntersect(const LineSegment2d& other_segment) const {
   Vec2d point;
   return GetIntersect(other_segment, &point);
 }
 
-bool LineSegment2d::GetIntersect(const LineSegment2d &other_segment,
-                                 Vec2d *const point) const {
+bool LineSegment2d::GetIntersect(const LineSegment2d& other_segment,
+                                 Vec2d* const point) const {
   assert(point);
   if (IsPointIn(other_segment.start())) {
     *point = other_segment.start();
@@ -219,8 +220,8 @@ bool LineSegment2d::GetIntersect(const LineSegment2d &other_segment,
 }
 
 // return distance with perpendicular foot point.
-double LineSegment2d::GetPerpendicularFoot(const Vec2d &point,
-                                           Vec2d *const foot_point) const {
+double LineSegment2d::GetPerpendicularFoot(const Vec2d& point,
+                                           Vec2d* const foot_point) const {
   assert(foot_point);
   if (length_ <= kMathEpsilon) {
     *foot_point = start_;
@@ -235,7 +236,7 @@ double LineSegment2d::GetPerpendicularFoot(const Vec2d &point,
 
 std::vector<Vec2d> LineSegment2d::SamplePoints(double step) {
   int num = int(length_ / step);
-  if(length_ / step - num > 1e-5) {
+  if (length_ / step - num > 1e-5) {
     // warning
   }
   std::vector<Vec2d> points(num);
@@ -248,4 +249,4 @@ std::vector<Vec2d> LineSegment2d::SamplePoints(double step) {
 }
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

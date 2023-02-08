@@ -49,7 +49,7 @@ namespace math {
  * called "length", and the size of the axis perpendicular to it "width".
  */
 class Box2d {
-public:
+ public:
   Box2d() = default;
   /**
    * @brief Constructor which takes the center, heading, length and width.
@@ -59,7 +59,7 @@ public:
    * @param length The size of the heading-axis.
    * @param width The size of the axis perpendicular to the heading-axis.
    */
-  Box2d(const Vec2d &center, const double heading, const double length,
+  Box2d(const Vec2d& center, const double heading, const double length,
         const double width);
 
   /**
@@ -68,13 +68,13 @@ public:
    * @param width The width of the box, which is taken perpendicularly
    * to the heading direction.
    */
-  Box2d(const LineSegment2d &axis, const double width);
+  Box2d(const LineSegment2d& axis, const double width);
 
   /**
    * @brief Constructor which takes an AABox2d (axes-aligned box).
    * @param aabox The input AABox2d.
    */
-  explicit Box2d(const AABox2d &aabox);
+  explicit Box2d(const AABox2d& aabox);
 
   /**
    * @brief Creates an axes-aligned Box2d from two opposite corners
@@ -82,14 +82,14 @@ public:
    * @param opposite_corner The opposite corner to the first one
    * @return An axes-aligned Box2d
    */
-  static Box2d CreateAABox(const Vec2d &one_corner,
-                           const Vec2d &opposite_corner);
+  static Box2d CreateAABox(const Vec2d& one_corner,
+                           const Vec2d& opposite_corner);
 
   /**
    * @brief Getter of the center of the box
    * @return The center of the box
    */
-  const Vec2d &center() const { return center_; }
+  const Vec2d& center() const { return center_; }
 
   /**
    * @brief Getter of the x-coordinate of the center of the box
@@ -161,62 +161,62 @@ public:
    * @brief Getter of the corners of the box
    * @param corners The vector where the corners are listed
    */
-  void GetAllCorners(std::vector<Vec2d> *const corners) const;
+  void GetAllCorners(std::vector<Vec2d>* const corners) const;
 
   /**
    * @brief Getter of the corners of the box
    * @param corners The vector where the corners are listed
    */
-  const std::vector<Vec2d> &corners() const { return corners_; }
+  const std::vector<Vec2d>& corners() const { return corners_; }
 
   /**
    * @brief Tests points for membership in the box
    * @param point A point that we wish to test for membership in the box
    * @return True iff the point is contained in the box
    */
-  bool IsPointIn(const Vec2d &point) const;
+  bool IsPointIn(const Vec2d& point) const;
 
   /**
    * @brief Tests points for membership in the boundary of the box
    * @param point A point that we wish to test for membership in the boundary
    * @return True iff the point is a boundary point of the box
    */
-  bool IsPointOnBoundary(const Vec2d &point) const;
+  bool IsPointOnBoundary(const Vec2d& point) const;
 
   /**
    * @brief Determines the distance between the box and a given point
    * @param point The point whose distance to the box we wish to compute
    * @return A distance
    */
-  double DistanceTo(const Vec2d &point) const;
+  double DistanceTo(const Vec2d& point) const;
 
   /**
    * @brief Determines the distance between the box and a given line segment
    * @param line_segment The line segment whose distance to the box we compute
    * @return A distance
    */
-  double DistanceTo(const LineSegment2d &line_segment) const;
+  double DistanceTo(const LineSegment2d& line_segment) const;
 
   /**
    * @brief Determines the distance between two boxes
    * @param box The box whose distance to this box we want to compute
    * @return A distance
    */
-  double DistanceTo(const Box2d &box) const;
+  double DistanceTo(const Box2d& box) const;
 
   /**
    * @brief Determines whether this box overlaps a given line segment
    * @param line_segment The line-segment
    * @return True if they overlap
    */
-  bool HasOverlap(const LineSegment2d &line_segment) const;
+  bool HasOverlap(const LineSegment2d& line_segment) const;
 
   /**
    * @brief Determines whether these two boxes overlap
    * @param line_segment The other box
    * @return True if they overlap
    */
-  bool HasOverlap(const Box2d &box) const;
+  bool HasOverlap(const Box2d& box) const;
 
   /**
    * @brief Gets the smallest axes-aligned box containing the current one
@@ -234,7 +234,7 @@ public:
    * @brief Shifts this box by a given vector
    * @param shift_vec The vector determining the shift
    */
-  void Shift(const Vec2d &shift_vec);
+  void Shift(const Vec2d& shift_vec);
 
   /**
    * @brief Extend the box longitudinally
@@ -257,7 +257,7 @@ public:
   double max_y() const { return max_y_; }
   double min_y() const { return min_y_; }
 
-private:
+ private:
   Vec2d center_;
   double length_ = 0.0;
   double width_ = 0.0;
@@ -276,4 +276,4 @@ private:
 };
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

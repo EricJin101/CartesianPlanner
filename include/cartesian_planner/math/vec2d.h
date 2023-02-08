@@ -38,7 +38,7 @@ constexpr double kMathEpsilon = 1e-10;
  * @brief Implements a class of 2-dimensional vectors.
  */
 class Vec2d {
-public:
+ public:
   //! Constructor which takes x- and y-coordinates.
   constexpr Vec2d(const double x, const double y) noexcept : x_(x), y_(y) {}
 
@@ -73,16 +73,16 @@ public:
   void Normalize();
 
   //! Returns the distance to the given vector
-  double DistanceTo(const Vec2d &other) const;
+  double DistanceTo(const Vec2d& other) const;
 
   //! Returns the squared distance to the given vector
-  double DistanceSquareTo(const Vec2d &other) const;
+  double DistanceSquareTo(const Vec2d& other) const;
 
   //! Returns the "cross" product between these two Vec2d (non-standard).
-  double CrossProd(const Vec2d &other) const;
+  double CrossProd(const Vec2d& other) const;
 
   //! Returns the inner product between these two Vec2d.
-  double InnerProd(const Vec2d &other) const;
+  double InnerProd(const Vec2d& other) const;
 
   //! rotate the vector by angle.
   Vec2d rotate(const double angle) const;
@@ -91,10 +91,10 @@ public:
   void SelfRotate(const double angle);
 
   //! Sums two Vec2d
-  Vec2d operator+(const Vec2d &other) const;
+  Vec2d operator+(const Vec2d& other) const;
 
   //! Subtracts two Vec2d
-  Vec2d operator-(const Vec2d &other) const;
+  Vec2d operator-(const Vec2d& other) const;
 
   //! Multiplies Vec2d by a scalar
   Vec2d operator*(const double ratio) const;
@@ -103,27 +103,27 @@ public:
   Vec2d operator/(const double ratio) const;
 
   //! Sums another Vec2d to the current one
-  Vec2d &operator+=(const Vec2d &other);
+  Vec2d& operator+=(const Vec2d& other);
 
   //! Subtracts another Vec2d to the current one
-  Vec2d &operator-=(const Vec2d &other);
+  Vec2d& operator-=(const Vec2d& other);
 
   //! Multiplies this Vec2d by a scalar
-  Vec2d &operator*=(const double ratio);
+  Vec2d& operator*=(const double ratio);
 
   //! Divides this Vec2d by a scalar
-  Vec2d &operator/=(const double ratio);
+  Vec2d& operator/=(const double ratio);
 
   //! Compares two Vec2d
-  bool operator==(const Vec2d &other) const;
+  bool operator==(const Vec2d& other) const;
 
-protected:
+ protected:
   double x_ = 0.0;
   double y_ = 0.0;
 };
 
 //! Multiplies the given Vec2d by a given scalar
-Vec2d operator*(const double ratio, const Vec2d &vec);
+Vec2d operator*(const double ratio, const Vec2d& vec);
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

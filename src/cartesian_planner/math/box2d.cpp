@@ -46,7 +46,7 @@ double PtSegDistance(double query_x, double query_y, double start_x,
 
 }  // namespace
 
-Box2d::Box2d(const Vec2d &center, const double heading, const double length,
+Box2d::Box2d(const Vec2d& center, const double heading, const double length,
              const double width)
     : center_(center),
       length_(length),
@@ -59,7 +59,7 @@ Box2d::Box2d(const Vec2d &center, const double heading, const double length,
   InitCorners();
 }
 
-Box2d::Box2d(const LineSegment2d &axis, const double width)
+Box2d::Box2d(const LineSegment2d& axis, const double width)
     : center_(axis.center()),
       length_(axis.length()),
       width_(width),
@@ -82,7 +82,7 @@ void Box2d::InitCorners() {
   corners_.emplace_back(center_.x() - dx1 - dx2, center_.y() - dy1 - dy2);
   corners_.emplace_back(center_.x() - dx1 + dx2, center_.y() - dy1 + dy2);
 
-  for (auto &corner : corners_) {
+  for (auto& corner : corners_) {
     max_x_ = std::fmax(corner.x(), max_x_);
     min_x_ = std::fmin(corner.x(), min_x_);
     max_y_ = std::fmax(corner.y(), max_y_);
@@ -90,7 +90,7 @@ void Box2d::InitCorners() {
   }
 }
 
-Box2d::Box2d(const AABox2d &aabox)
+Box2d::Box2d(const AABox2d& aabox)
     : center_(aabox.center()),
       length_(aabox.length()),
       width_(aabox.width()),
@@ -99,13 +99,15 @@ Box2d::Box2d(const AABox2d &aabox)
       heading_(0.0),
       cos_heading_(1.0),
       sin_heading_(0.0),
-      min_x_(aabox.min_x()), min_y_(aabox.min_y()),
-      max_x_(aabox.max_x()), max_y_(aabox.max_y()) {
+      min_x_(aabox.min_x()),
+      min_y_(aabox.min_y()),
+      max_x_(aabox.max_x()),
+      max_y_(aabox.max_y()) {
   aabox.GetAllCorners(&corners_);
 }
 
-Box2d Box2d::CreateAABox(const Vec2d &one_corner,
-                         const Vec2d &opposite_corner) {
+Box2d Box2d::CreateAABox(const Vec2d& one_corner,
+                         const Vec2d& opposite_corner) {
   const double x1 = std::min(one_corner.x(), opposite_corner.x());
   const double x2 = std::max(one_corner.x(), opposite_corner.x());
   const double y1 = std::min(one_corner.y(), opposite_corner.y());
@@ -113,14 +115,14 @@ Box2d Box2d::CreateAABox(const Vec2d &one_corner,
   return Box2d({(x1 + x2) / 2.0, (y1 + y2) / 2.0}, 0.0, x2 - x1, y2 - y1);
 }
 
-void Box2d::GetAllCorners(std::vector<Vec2d> *const corners) const {
+void Box2d::GetAllCorners(std::vector<Vec2d>* const corners) const {
   if (corners == nullptr) {
     return;
   }
   *corners = corners_;
 }
 
-bool Box2d::IsPointIn(const Vec2d &point) const {
+bool Box2d::IsPointIn(const Vec2d& point) const {
   const double x0 = point.x() - center_.x();
   const double y0 = point.y() - center_.y();
   const double dx = std::abs(x0 * cos_heading_ + y0 * sin_heading_);
@@ -128,7 +130,7 @@ bool Box2d::IsPointIn(const Vec2d &point) const {
   return dx <= half_length_ + kMathEpsilon && dy <= half_width_ + kMathEpsilon;
 }
 
-bool Box2d::IsPointOnBoundary(const Vec2d &point) const {
+bool Box2d::IsPointOnBoundary(const Vec2d& point) const {
   const double x0 = point.x() - center_.x();
   const double y0 = point.y() - center_.y();
   const double dx = std::abs(x0 * cos_heading_ + y0 * sin_heading_);
@@ -139,7 +141,7 @@ bool Box2d::IsPointOnBoundary(const Vec2d &point) const {
           dx <= half_length_ + kMathEpsilon);
 }
 
-double Box2d::DistanceTo(const Vec2d &point) const {
+double Box2d::DistanceTo(const Vec2d& point) const {
   const double x0 = point.x() - center_.x();
   const double y0 = point.y() - center_.y();
   const double dx =
@@ -155,7 +157,7 @@ double Box2d::DistanceTo(const Vec2d &point) const {
   return hypot(dx, dy);
 }
 
-bool Box2d::HasOverlap(const LineSegment2d &line_segment) const {
+bool Box2d::HasOverlap(const LineSegment2d& line_segment) const {
   if (line_segment.length() <= kMathEpsilon) {
     return IsPointIn(line_segment.start());
   }
@@ -168,7 +170,7 @@ bool Box2d::HasOverlap(const LineSegment2d &line_segment) const {
   return DistanceTo(line_segment) <= kMathEpsilon;
 }
 
-double Box2d::DistanceTo(const LineSegment2d &line_segment) const {
+double Box2d::DistanceTo(const LineSegment2d& line_segment) const {
   if (line_segment.length() <= kMathEpsilon) {
     return DistanceTo(line_segment.start());
   }
@@ -227,17 +229,17 @@ double Box2d::DistanceTo(const LineSegment2d &line_segment) const {
                                          line_segment.length());
       case -1:
         return CrossProd({x1, y1}, {x2, y2}, {box_x, -box_y}) >= 0.0
-               ? 0.0
-               : PtSegDistance(box_x, -box_y, x1, y1, x2, y2,
-                               line_segment.length());
+                   ? 0.0
+                   : PtSegDistance(box_x, -box_y, x1, y1, x2, y2,
+                                   line_segment.length());
       case -4:
         return CrossProd({x1, y1}, {x2, y2}, {box_x, -box_y}) <= 0.0
-               ? PtSegDistance(box_x, -box_y, x1, y1, x2, y2,
-                               line_segment.length())
-               : (CrossProd({x1, y1}, {x2, y2}, {-box_x, box_y}) <= 0.0
-                  ? 0.0
-                  : PtSegDistance(-box_x, box_y, x1, y1, x2, y2,
-                                  line_segment.length()));
+                   ? PtSegDistance(box_x, -box_y, x1, y1, x2, y2,
+                                   line_segment.length())
+                   : (CrossProd({x1, y1}, {x2, y2}, {-box_x, box_y}) <= 0.0
+                          ? 0.0
+                          : PtSegDistance(-box_x, box_y, x1, y1, x2, y2,
+                                          line_segment.length()));
     }
   } else {
     switch (gx2 * 3 + gy2) {
@@ -250,9 +252,9 @@ double Box2d::DistanceTo(const LineSegment2d &line_segment) const {
       case 1:
       case -2:
         return CrossProd({x1, y1}, {x2, y2}, {box_x, box_y}) <= 0.0
-               ? 0.0
-               : PtSegDistance(box_x, box_y, x1, y1, x2, y2,
-                               line_segment.length());
+                   ? 0.0
+                   : PtSegDistance(box_x, box_y, x1, y1, x2, y2,
+                                   line_segment.length());
       case -3:
         return 0.0;
     }
@@ -260,11 +262,11 @@ double Box2d::DistanceTo(const LineSegment2d &line_segment) const {
   return 0.0;
 }
 
-double Box2d::DistanceTo(const Box2d &box) const {
+double Box2d::DistanceTo(const Box2d& box) const {
   return Polygon2d(box).DistanceTo(*this);
 }
 
-bool Box2d::HasOverlap(const Box2d &box) const {
+bool Box2d::HasOverlap(const Box2d& box) const {
   if (box.max_x() < min_x() || box.min_x() > max_x() || box.max_y() < min_y() ||
       box.min_y() > max_y()) {
     return false;
@@ -283,21 +285,21 @@ bool Box2d::HasOverlap(const Box2d &box) const {
   const double dy4 = -box.cos_heading() * box.half_width();
 
   return std::abs(shift_x * cos_heading_ + shift_y * sin_heading_) <=
-         std::abs(dx3 * cos_heading_ + dy3 * sin_heading_) +
-         std::abs(dx4 * cos_heading_ + dy4 * sin_heading_) +
-         half_length_ &&
+             std::abs(dx3 * cos_heading_ + dy3 * sin_heading_) +
+                 std::abs(dx4 * cos_heading_ + dy4 * sin_heading_) +
+                 half_length_ &&
          std::abs(shift_x * sin_heading_ - shift_y * cos_heading_) <=
-         std::abs(dx3 * sin_heading_ - dy3 * cos_heading_) +
-         std::abs(dx4 * sin_heading_ - dy4 * cos_heading_) +
-         half_width_ &&
+             std::abs(dx3 * sin_heading_ - dy3 * cos_heading_) +
+                 std::abs(dx4 * sin_heading_ - dy4 * cos_heading_) +
+                 half_width_ &&
          std::abs(shift_x * box.cos_heading() + shift_y * box.sin_heading()) <=
-         std::abs(dx1 * box.cos_heading() + dy1 * box.sin_heading()) +
-         std::abs(dx2 * box.cos_heading() + dy2 * box.sin_heading()) +
-         box.half_length() &&
+             std::abs(dx1 * box.cos_heading() + dy1 * box.sin_heading()) +
+                 std::abs(dx2 * box.cos_heading() + dy2 * box.sin_heading()) +
+                 box.half_length() &&
          std::abs(shift_x * box.sin_heading() - shift_y * box.cos_heading()) <=
-         std::abs(dx1 * box.sin_heading() - dy1 * box.cos_heading()) +
-         std::abs(dx2 * box.sin_heading() - dy2 * box.cos_heading()) +
-         box.half_width();
+             std::abs(dx1 * box.sin_heading() - dy1 * box.cos_heading()) +
+                 std::abs(dx2 * box.sin_heading() - dy2 * box.cos_heading()) +
+                 box.half_width();
 }
 
 AABox2d Box2d::GetAABox() const {
@@ -315,7 +317,7 @@ void Box2d::RotateFromCenter(const double rotate_angle) {
   InitCorners();
 }
 
-void Box2d::Shift(const Vec2d &shift_vec) {
+void Box2d::Shift(const Vec2d& shift_vec) {
   center_ += shift_vec;
   InitCorners();
 }
@@ -333,4 +335,4 @@ void Box2d::LateralExtend(const double extension_length) {
 }
 
 }  // namespace math
-}  // namespace common
+}  // namespace cartesian_planner

@@ -3,8 +3,8 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
@@ -12,8 +12,8 @@
 #include "cartesian_planner/dp_planner.h"
 
 #include <bitset>
-#include <utility>
 #include <sstream>
+#include <utility>
 
 #include "cartesian_planner/math/math_utils.h"
 #include "cartesian_planner/math/polygon2d.h"
@@ -23,8 +23,11 @@ namespace cartesian_planner {
 
 constexpr double kMathEpsilon = 1e-3;
 
-DpPlanner::DpPlanner(const CartesianPlannerConfig &config, const Env &env)
-  : env_(env), config_(config), nseg_(config.nfe / NT), unit_time_(config.tf / NT) {
+DpPlanner::DpPlanner(const CartesianPlannerConfig& config, const Env& env)
+    : env_(env),
+      config_(config),
+      nseg_(config.nfe / NT),
+      unit_time_(config.tf / NT) {
   time_ = math::LinSpaced<NT>(unit_time_, config.tf);
   station_ = math::LinSpaced<NS>(0, unit_time_ * config_.vehicle.max_velocity);
   lateral_ = math::LinSpaced<NL - 1>(0, 1);
@@ -35,15 +38,17 @@ double DpPlanner::GetCollisionCost(StateIndex parent_ind, StateIndex cur_ind) {
   double parent_s = state_.start_s, grandparent_s = state_.start_s;
   double last_l = state_.start_l, last_s = state_.start_s;
   if (parent_ind.t >= 0) {
-    auto &cell = state_space_[parent_ind.t][parent_ind.s][parent_ind.l];
+    auto& cell = state_space_[parent_ind.t][parent_ind.s][parent_ind.l];
     parent_s = cell.current_s;
 
     if (parent_ind.t > 0) {
-      auto &parent_cell = state_space_[parent_ind.t - 1][cell.parent_s_ind][cell.parent_l_ind];
+      auto& parent_cell =
+          state_space_[parent_ind.t - 1][cell.parent_s_ind][cell.parent_l_ind];
       grandparent_s = parent_cell.current_s;
     }
 
-    auto prev_path = InterpolateLinearly(grandparent_s, cell.parent_l_ind, parent_ind.s, parent_ind.l);
+    auto prev_path = InterpolateLinearly(grandparent_s, cell.parent_l_ind,
+                                         parent_ind.s, parent_ind.l);
     last_l = prev_path.back().y();
     last_s = prev_path.back().x();
   }
@@ -51,7 +56,7 @@ double DpPlanner::GetCollisionCost(StateIndex parent_ind, StateIndex cur_ind) {
   auto path = InterpolateLinearly(parent_s, parent_ind.l, cur_ind.s, cur_ind.l);
 
   for (int i = 0; i < path.size(); i++) {
-    auto &pt = path[i];
+    auto& pt = path[i];
     double dl = pt.y() - last_l;
     double ds = std::max(pt.x() - last_s, kMathEpsilon);
     last_l = pt.y();
@@ -71,7 +76,7 @@ double DpPlanner::GetCollisionCost(StateIndex parent_ind, StateIndex cur_ind) {
     double parent_time = parent_ind.t < 0 ? 0.0 : time_[parent_ind.t];
     double time = parent_time + i * (unit_time_ / nseg_);
 
-    if(env_->CheckOptimizationCollision(time, pose)) {
+    if (env_->CheckOptimizationCollision(time, pose)) {
       return config_.dp_w_obstacle;
     }
   }
@@ -79,19 +84,22 @@ double DpPlanner::GetCollisionCost(StateIndex parent_ind, StateIndex cur_ind) {
   return 0.0;
 }
 
-std::pair<double, double> DpPlanner::GetCost(StateIndex parent_ind, StateIndex cur_ind) {
+std::pair<double, double> DpPlanner::GetCost(StateIndex parent_ind,
+                                             StateIndex cur_ind) {
   double parent_s = state_.start_s, grandparent_s = state_.start_s;
   double parent_l = state_.start_l, grandparent_l = state_.start_l;
 
   if (parent_ind.t >= 0) {
-    auto &cell = state_space_[parent_ind.t][parent_ind.s][parent_ind.l];
+    auto& cell = state_space_[parent_ind.t][parent_ind.s][parent_ind.l];
     int grandparent_s_ind = cell.parent_s_ind;
     int grandparent_l_ind = cell.parent_l_ind;
     parent_s = cell.current_s;
     parent_l = GetLateralOffset(parent_s, parent_ind.l);
 
     if (parent_ind.t >= 1) {
-      grandparent_s = state_space_[parent_ind.t - 1][grandparent_s_ind][grandparent_l_ind].current_s;
+      grandparent_s =
+          state_space_[parent_ind.t - 1][grandparent_s_ind][grandparent_l_ind]
+              .current_s;
       grandparent_l = GetLateralOffset(grandparent_s, grandparent_l_ind);
     }
   }
@@ -111,22 +119,26 @@ std::pair<double, double> DpPlanner::GetCost(StateIndex parent_ind, StateIndex c
   }
 
   double cost_lateral = fabs(cur_l);
-  double cost_lateral_change = fabs(parent_l - cur_l) / (station_[cur_ind.s] + kMathEpsilon);
+  double cost_lateral_change =
+      fabs(parent_l - cur_l) / (station_[cur_ind.s] + kMathEpsilon);
   double cost_lateral_change_t = fabs(dl1 - dl0) / unit_time_;
-  double cost_longitudinal_velocity = fabs(ds1 / unit_time_ - config_.dp_nominal_velocity);
+  double cost_longitudinal_velocity =
+      fabs(ds1 / unit_time_ - config_.dp_nominal_velocity);
   double cost_longitudinal_velocity_change = fabs((ds1 - ds0) / unit_time_);
 
-  double delta_cost = (
-    config_.dp_w_lateral * cost_lateral +
-    config_.dp_w_lateral_change * cost_lateral_change +
-    config_.dp_w_lateral_velocity_change * cost_lateral_change_t +
-    config_.dp_w_longitudinal_velocity_bias * cost_longitudinal_velocity +
-    config_.dp_w_longitudinal_velocity_change * cost_longitudinal_velocity_change);
+  double delta_cost =
+      (config_.dp_w_lateral * cost_lateral +
+       config_.dp_w_lateral_change * cost_lateral_change +
+       config_.dp_w_lateral_velocity_change * cost_lateral_change_t +
+       config_.dp_w_longitudinal_velocity_bias * cost_longitudinal_velocity +
+       config_.dp_w_longitudinal_velocity_change *
+           cost_longitudinal_velocity_change);
 
   return std::make_pair(cur_s, delta_cost);
 }
 
-bool DpPlanner::Plan(double start_x, double start_y, double start_theta, DiscretizedTrajectory &result) {
+bool DpPlanner::Plan(double start_x, double start_y, double start_theta,
+                     DiscretizedTrajectory& result) {
   auto sl = env_->reference().GetProjection({start_x, start_y});
   state_.start_s = sl.x();
   state_.start_l = sl.y();
@@ -191,7 +203,7 @@ bool DpPlanner::Plan(double start_x, double start_y, double start_theta, Discret
 
   // trace back layers to find optimum trajectory
   for (int i = NT - 1; i >= 0; i--) {
-    auto &cell = state_space_[i][min_s_ind][min_l_ind];
+    auto& cell = state_space_[i][min_s_ind][min_l_ind];
     waypoints[i] = std::make_pair(StateIndex(i, min_s_ind, min_l_ind), cell);
     min_s_ind = cell.parent_s_ind;
     min_l_ind = cell.parent_l_ind;
@@ -199,7 +211,7 @@ bool DpPlanner::Plan(double start_x, double start_y, double start_theta, Discret
 
   ROS_INFO("s[0] = %f", state_.start_s);
   int t_ind = 1;
-  for(auto &wp: waypoints) {
+  for (auto& wp : waypoints) {
     ROS_INFO("s[%d] = %f", t_ind++, wp.second.current_s);
   }
 
@@ -209,9 +221,11 @@ bool DpPlanner::Plan(double start_x, double start_y, double start_theta, Discret
   double last_l = state_.start_l, last_s = state_.start_s;
 
   for (int i = 0; i < NT; i++) {
-    double parent_s = i > 0 ? waypoints[i - 1].second.current_s : state_.start_s;
-    auto segment = InterpolateLinearly(parent_s, waypoints[i].second.parent_l_ind, waypoints[i].first.s,
-                                       waypoints[i].first.l);
+    double parent_s =
+        i > 0 ? waypoints[i - 1].second.current_s : state_.start_s;
+    auto segment =
+        InterpolateLinearly(parent_s, waypoints[i].second.parent_l_ind,
+                            waypoints[i].first.s, waypoints[i].first.l);
 
     for (int j = 0; j < nseg_; j++) {
       auto dl = segment[j].y() - last_l;
@@ -225,7 +239,8 @@ bool DpPlanner::Plan(double start_x, double start_y, double start_theta, Discret
       data[n].s = segment[j].x();
       data[n].x = xy.x();
       data[n].y = xy.y();
-      data[n].theta = tp.theta + atan((dl / ds) / (1 - tp.kappa * segment[j].y()));
+      data[n].theta =
+          tp.theta + atan((dl / ds) / (1 - tp.kappa * segment[j].y()));
     }
   }
   data[0].theta = state_.start_theta;
@@ -235,7 +250,10 @@ bool DpPlanner::Plan(double start_x, double start_y, double start_theta, Discret
   return min_cost < config_.dp_w_obstacle;
 }
 
-std::vector<Vec2d> DpPlanner::InterpolateLinearly(double parent_s, int parent_l_ind, int cur_s_ind, int cur_l_ind) {
+std::vector<Vec2d> DpPlanner::InterpolateLinearly(double parent_s,
+                                                  int parent_l_ind,
+                                                  int cur_s_ind,
+                                                  int cur_l_ind) {
   std::vector<Vec2d> result(nseg_);
 
   double p_l = state_.start_l;
@@ -258,4 +276,4 @@ std::vector<Vec2d> DpPlanner::InterpolateLinearly(double parent_s, int parent_l_
   return result;
 }
 
-}
+}  // namespace cartesian_planner

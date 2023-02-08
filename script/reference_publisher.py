@@ -221,7 +221,7 @@ def main():
     if 'dynamic' in sys.argv or 'pedestrian' in sys.argv:
         dynamic_obstacles = DynamicObstacles()
         if 'pedestrian' in sys.argv:
-            dynamic_obstacles.obstacles.extend(generate_random_pedestrian(center_line, 6).obstacles)
+            dynamic_obstacles.obstacles.extend(generate_random_pedestrian(center_line, 16).obstacles)
 
         if 'dynamic' in sys.argv:
             dynamic_obstacles.obstacles.extend(generate_random_dynamic_vehicles(center_line, 3).obstacles)

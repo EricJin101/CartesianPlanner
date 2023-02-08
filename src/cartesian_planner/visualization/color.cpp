@@ -3,13 +3,14 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
 
 #include "cartesian_planner/visualization/color.h"
+
 #include <cmath>
 
 namespace cartesian_planner {
@@ -60,7 +61,7 @@ Color Color::fromHSV(int H, double S, double V) {
   return Color(Rs + m, Gs + m, Bs + m);
 }
 
-void Color::toHSV(float &fH, float &fS, float &fV) const {
+void Color::toHSV(float& fH, float& fS, float& fV) const {
   float fCMax = std::max(std::max(r_, g_), b_);
   float fCMin = std::min(std::min(r_, g_), b_);
   float fDelta = fCMax - fCMin;
@@ -91,5 +92,5 @@ void Color::toHSV(float &fH, float &fS, float &fV) const {
     fH = 360 + fH;
   }
 }
-}
-}
+}  // namespace visualization
+}  // namespace cartesian_planner

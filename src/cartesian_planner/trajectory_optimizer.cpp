@@ -3,8 +3,8 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
@@ -18,15 +18,17 @@
 
 namespace cartesian_planner {
 
-TrajectoryOptimizer::TrajectoryOptimizer(const CartesianPlannerConfig &config, const Env &env)
-  : config_(config), env_(env), nlp_(config) {
+TrajectoryOptimizer::TrajectoryOptimizer(const CartesianPlannerConfig& config,
+                                         const Env& env)
+    : config_(config), env_(env), nlp_(config) {
   vehicle_ = config_.vehicle;
 }
 
-bool TrajectoryOptimizer::OptimizeIteratively(const DiscretizedTrajectory &coarse, const Constraints &constraints,
-                                              States &result) {
+bool TrajectoryOptimizer::OptimizeIteratively(
+    const DiscretizedTrajectory& coarse, const Constraints& constraints,
+    States& result) {
   States guess;
-  for (auto &pt: coarse.data()) {
+  for (auto& pt : coarse.data()) {
     guess.x.push_back(pt.x);
     guess.y.push_back(pt.y);
     guess.theta.push_back(pt.theta);
@@ -41,11 +43,14 @@ bool TrajectoryOptimizer::OptimizeIteratively(const DiscretizedTrajectory &coars
   while (iter < config_.opti_iter_max) {
     FormulateCorridorConstraints(guess, iterative_constraints);
 
-    double cur_infeasibility = nlp_.SolveIteratively(w_penalty, iterative_constraints, guess, coarse, guess);
-    visualization::Plot(guess.x, guess.y, 0.1, visualization::Color::Red, iter, "Intermediate Trajectory");
+    double cur_infeasibility = nlp_.SolveIteratively(
+        w_penalty, iterative_constraints, guess, coarse, guess);
+    visualization::Plot(guess.x, guess.y, 0.1, visualization::Color::Red, iter,
+                        "Intermediate Trajectory");
     visualization::Trigger();
 
-    ROS_INFO("iter = %d, cur_infeasibility = %f, w_penalty = %f", iter, cur_infeasibility, w_penalty);
+    ROS_INFO("iter = %d, cur_infeasibility = %f, w_penalty = %f", iter,
+             cur_infeasibility, w_penalty);
 
     if (cur_infeasibility < config_.opti_varepsilon_tol) {
       result = guess;
@@ -59,35 +64,45 @@ bool TrajectoryOptimizer::OptimizeIteratively(const DiscretizedTrajectory &coars
   return false;
 }
 
-void TrajectoryOptimizer::CalculateInitialGuess(States &states) const {
+void TrajectoryOptimizer::CalculateInitialGuess(States& states) const {
   states.v.resize(config_.nfe, 0.0);
   states.phi.resize(config_.nfe, 0.0);
 
   double hi = config_.tf / (config_.nfe - 1);
   for (size_t i = 1; i < states.x.size(); i++) {
-    double velocity = hypot(states.y[i] - states.y[i - 1], states.x[i] - states.x[i - 1]) / hi;
+    double velocity =
+        hypot(states.y[i] - states.y[i - 1], states.x[i] - states.x[i - 1]) /
+        hi;
 
     states.v[i] = std::min(vehicle_.max_velocity, velocity);
-    states.phi[i] = std::min(vehicle_.phi_max, std::max(-vehicle_.phi_max, atan(
-      (states.theta[i] - states.theta[i - 1]) * vehicle_.wheel_base / (states.v[i] * hi))));
+    states.phi[i] =
+        std::min(vehicle_.phi_max,
+                 std::max(-vehicle_.phi_max,
+                          atan((states.theta[i] - states.theta[i - 1]) *
+                               vehicle_.wheel_base / (states.v[i] * hi))));
   }
 
   states.a.resize(config_.nfe, 0.0);
   states.omega.resize(config_.nfe, 0.0);
   for (size_t i = 1; i < states.x.size(); i++) {
     states.a[i] = std::min(vehicle_.max_acceleration,
-                           std::max(vehicle_.min_acceleration, (states.v[i] - states.v[i - 1]) / hi));
-    states.omega[i] = std::min(vehicle_.omega_max,
-                               std::max(-vehicle_.omega_max, (states.phi[i] - states.phi[i - 1]) / hi));
+                           std::max(vehicle_.min_acceleration,
+                                    (states.v[i] - states.v[i - 1]) / hi));
+    states.omega[i] = std::min(
+        vehicle_.omega_max, std::max(-vehicle_.omega_max,
+                                     (states.phi[i] - states.phi[i - 1]) / hi));
   }
 
   states.jerk.resize(config_.nfe, 0.0);
   for (size_t i = 1; i < states.x.size(); i++) {
-    states.jerk[i] = std::min(vehicle_.jerk_max, std::max(-vehicle_.jerk_max, (states.a[i] - states.a[i - 1]) / hi));
+    states.jerk[i] = std::min(
+        vehicle_.jerk_max,
+        std::max(-vehicle_.jerk_max, (states.a[i] - states.a[i - 1]) / hi));
   }
 }
 
-bool TrajectoryOptimizer::FormulateCorridorConstraints(States &states, Constraints &constraints) {
+bool TrajectoryOptimizer::FormulateCorridorConstraints(
+    States& states, Constraints& constraints) {
   constraints.front_bound.resize(config_.nfe);
   constraints.rear_bound.resize(config_.nfe);
   states.xf.resize(config_.nfe);
@@ -99,25 +114,27 @@ bool TrajectoryOptimizer::FormulateCorridorConstraints(States &states, Constrain
 
   for (size_t i = 0; i < config_.nfe; i++) {
     double time = hi * i;
-    std::tie(states.xf[i], states.yf[i], states.xr[i], states.yr[i]) = vehicle_.GetDiscPositions(states.x[i],
-                                                                                                 states.y[i],
-                                                                                                 states.theta[i]);
+    std::tie(states.xf[i], states.yf[i], states.xr[i], states.yr[i]) =
+        vehicle_.GetDiscPositions(states.x[i], states.y[i], states.theta[i]);
 
     math::AABox2d box;
     if (!GenerateBox(time, states.xf[i], states.yf[i], vehicle_.radius, box)) {
       return false;
     }
-    constraints.front_bound[i] = {box.min_x(), box.max_x(), box.min_y(), box.max_y()};
+    constraints.front_bound[i] = {box.min_x(), box.max_x(), box.min_y(),
+                                  box.max_y()};
 
-    visualization::PlotPolygon(math::Polygon2d(math::Box2d(box)), 0.02, visualization::Color::Grey, i,
-                               "Front Corridor");
+    visualization::PlotPolygon(math::Polygon2d(math::Box2d(box)), 0.02,
+                               visualization::Color::Grey, i, "Front Corridor");
 
     if (!GenerateBox(time, states.xr[i], states.yr[i], vehicle_.radius, box)) {
       return false;
     }
-    constraints.rear_bound[i] = {box.min_x(), box.max_x(), box.min_y(), box.max_y()};
+    constraints.rear_bound[i] = {box.min_x(), box.max_x(), box.min_y(),
+                                 box.max_y()};
 
-    visualization::PlotPolygon(math::Polygon2d(math::Box2d(box)), 0.02, visualization::Color::Blue, i, "Rear Corridor");
+    visualization::PlotPolygon(math::Polygon2d(math::Box2d(box)), 0.02,
+                               visualization::Color::Blue, i, "Rear Corridor");
   }
 
   visualization::Trigger();
@@ -125,7 +142,8 @@ bool TrajectoryOptimizer::FormulateCorridorConstraints(States &states, Constrain
   return true;
 }
 
-bool TrajectoryOptimizer::GenerateBox(double time, double &x, double &y, double radius, AABox2d &result) const {
+bool TrajectoryOptimizer::GenerateBox(double time, double& x, double& y,
+                                      double radius, AABox2d& result) const {
   double ri = radius;
   AABox2d bound({-ri, -ri}, {ri, ri});
   if (CheckCollision(time, x, y, bound)) {
@@ -150,7 +168,8 @@ bool TrajectoryOptimizer::GenerateBox(double time, double &x, double &y, double 
       }
 
       inc++;
-    } while (CheckCollision(time, real_x, real_y, bound) && inc < config_.corridor_max_iter);
+    } while (CheckCollision(time, real_x, real_y, bound) &&
+             inc < config_.corridor_max_iter);
     if (inc > config_.corridor_max_iter) {
       return false;
     }
@@ -169,14 +188,16 @@ bool TrajectoryOptimizer::GenerateBox(double time, double &x, double &y, double 
     uint8_t edge = inc % 4;
     inc++;
 
-    if (blocked[edge]) continue;
+    if (blocked[edge])
+      continue;
 
     incremental[edge] = iter * step;
 
     AABox2d test({-ri - incremental[0], -ri - incremental[2]},
                  {ri + incremental[1], ri + incremental[3]});
 
-    if (CheckCollision(time, x, y, test) || incremental[edge] >= config_.corridor_incremental_limit) {
+    if (CheckCollision(time, x, y, test) ||
+        incremental[edge] >= config_.corridor_incremental_limit) {
       incremental[edge] -= step;
       blocked[edge] = true;
     }
@@ -189,4 +210,4 @@ bool TrajectoryOptimizer::GenerateBox(double time, double &x, double &y, double 
             {x + incremental[1], y + incremental[3]}};
   return true;
 }
-}
+}  // namespace cartesian_planner

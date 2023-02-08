@@ -3,8 +3,8 @@
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method".
  ***********************************************************************************
  *  Copyright (C) 2022 Bai Li
- *  Users are suggested to cite the following article when they use the source codes.
- *  Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
+ *  Users are suggested to cite the following article when they use the source
+ *codes. Bai Li et al., "Autonomous Driving on Curvy Roads without Reliance on
  *  Frenet Frame: A Cartesian-based Trajectory Planning Method",
  *  IEEE Transactions on Intelligent Transportation Systems, 2022.
  ***********************************************************************************/
@@ -13,15 +13,16 @@
 
 namespace cartesian_planner {
 
-TrajectoryNLP::TrajectoryNLP(const CartesianPlannerConfig &config) : config_(config) {
+TrajectoryNLP::TrajectoryNLP(const CartesianPlannerConfig& config)
+    : config_(config) {
   nlp_config_ = {{"ipopt", Dict({
 #ifdef WITH_HSL
-    {"linear_solver", "ma27"},
+                               {"linear_solver", "ma27"},
 #else
-    {"linear_solver", "mumps"},
+                               {"linear_solver", "mumps"},
 #endif
-    {"print_level",   5},
-    })}};
+                               {"print_level", 5},
+                           })}};
 
   BuildIterativeNLP();
 }
@@ -52,7 +53,9 @@ void TrajectoryNLP::BuildIterativeNLP() {
   auto next = Slice(1, config_.nfe);
   auto g_x_kin = x(next) - (x(prev) + hi * v(prev) * cos(theta(prev)));
   auto g_y_kin = y(next) - (y(prev) + hi * v(prev) * sin(theta(prev)));
-  auto g_theta_kin = theta(next) - (theta(prev) + hi * v(prev) * tan(phi(prev)) / config_.vehicle.wheel_base);
+  auto g_theta_kin =
+      theta(next) - (theta(prev) + hi * v(prev) * tan(phi(prev)) /
+                                       config_.vehicle.wheel_base);
   auto g_v_kin = v(next) - (v(prev) + hi * a(prev));
   auto g_phi_kin = phi(next) - (phi(prev) + hi * omega(prev));
   auto g_a_kin = a(next) - (a(prev) + hi * jerk(prev));
@@ -62,30 +65,35 @@ void TrajectoryNLP::BuildIterativeNLP() {
   auto g_xr_kin = xr - (x + config_.vehicle.r2x * cos(theta));
   auto g_yr_kin = yr - (y + config_.vehicle.r2x * sin(theta));
 
-  auto infeasibility = sumsqr(SX::vertcat({
-                                            g_x_kin, g_y_kin, g_theta_kin, g_v_kin, g_phi_kin, g_a_kin, g_xf_kin,
-                                            g_yf_kin, g_xr_kin, g_yr_kin}));
+  auto infeasibility =
+      sumsqr(SX::vertcat({g_x_kin, g_y_kin, g_theta_kin, g_v_kin, g_phi_kin,
+                          g_a_kin, g_xf_kin, g_yf_kin, g_xr_kin, g_yr_kin}));
 
   SX f_obj =
-    sumsqr(x - p_ref_x) + sumsqr(y - p_ref_y) + config_.opti_w_r_theta * sumsqr(theta - p_ref_theta) +
-    config_.opti_w_u * (sumsqr(jerk) + config_.opti_w_rw * sumsqr(omega)) +
-    p_inf_w * infeasibility;
+      sumsqr(x - p_ref_x) + sumsqr(y - p_ref_y) +
+      config_.opti_w_r_theta * sumsqr(theta - p_ref_theta) +
+      config_.opti_w_u * (sumsqr(jerk) + config_.opti_w_rw * sumsqr(omega)) +
+      p_inf_w * infeasibility;
 
   SX p = SX::vertcat({p_inf_w, p_ref_x, p_ref_y, p_ref_theta});
-  SX opti_x = SX::vertcat({x, y, theta, v, phi, a, omega, jerk, xf, yf, xr, yr});
-  SXDict nlp = {{"x", opti_x},
-                {"p", p},
-                {"f", f_obj}};
+  SX opti_x =
+      SX::vertcat({x, y, theta, v, phi, a, omega, jerk, xf, yf, xr, yr});
+  SXDict nlp = {{"x", opti_x}, {"p", p}, {"f", f_obj}};
   iterative_solver_ = nlpsol("iterative_solver", "ipopt", nlp, nlp_config_);
   infeasibility_evaluator_ = Function("inf", {opti_x}, {infeasibility}, {});
 }
 
-double TrajectoryNLP::SolveIteratively(double w_inf, const Constraints &constraints, const States &guess,
-                                       const DiscretizedTrajectory &reference, States &result) {
+double TrajectoryNLP::SolveIteratively(double w_inf,
+                                       const Constraints& constraints,
+                                       const States& guess,
+                                       const DiscretizedTrajectory& reference,
+                                       States& result) {
   auto identity = DM::ones(config_.nfe, 1);
 
-  DM lb_x, lb_y, lb_theta, lb_v, lb_phi, lb_a, lb_omega, lb_jerk, lb_xf, lb_yf, lb_xr, lb_yr;
-  DM ub_x, ub_y, ub_theta, ub_v, ub_phi, ub_a, ub_omega, ub_jerk, ub_xf, ub_yf, ub_xr, ub_yr;
+  DM lb_x, lb_y, lb_theta, lb_v, lb_phi, lb_a, lb_omega, lb_jerk, lb_xf, lb_yf,
+      lb_xr, lb_yr;
+  DM ub_x, ub_y, ub_theta, ub_v, ub_phi, ub_a, ub_omega, ub_jerk, ub_xf, ub_yf,
+      ub_xr, ub_yr;
 
   lb_x = -inf * identity;
   ub_x = inf * identity;
@@ -132,11 +140,13 @@ double TrajectoryNLP::SolveIteratively(double w_inf, const Constraints &constrai
   }
 
   DMDict arg, res;
-  arg["lbx"] = DM::vertcat({lb_x, lb_y, lb_theta, lb_v, lb_phi, lb_a, lb_omega, lb_jerk, lb_xf, lb_yf, lb_xr, lb_yr});
-  arg["ubx"] = DM::vertcat({ub_x, ub_y, ub_theta, ub_v, ub_phi, ub_a, ub_omega, ub_jerk, ub_xf, ub_yf, ub_xr, ub_yr});
-  arg["x0"] = DM::vertcat(
-    {guess.x, guess.y, guess.theta, guess.v, guess.phi, guess.a, guess.omega, guess.jerk, guess.xf, guess.yf, guess.xr,
-     guess.yr});
+  arg["lbx"] = DM::vertcat({lb_x, lb_y, lb_theta, lb_v, lb_phi, lb_a, lb_omega,
+                            lb_jerk, lb_xf, lb_yf, lb_xr, lb_yr});
+  arg["ubx"] = DM::vertcat({ub_x, ub_y, ub_theta, ub_v, ub_phi, ub_a, ub_omega,
+                            ub_jerk, ub_xf, ub_yf, ub_xr, ub_yr});
+  arg["x0"] = DM::vertcat({guess.x, guess.y, guess.theta, guess.v, guess.phi,
+                           guess.a, guess.omega, guess.jerk, guess.xf, guess.yf,
+                           guess.xr, guess.yr});
 
   DM ref_x(config_.nfe, 1), ref_y(config_.nfe, 1), ref_theta(config_.nfe, 1);
   for (int i = 0; i < config_.nfe; i++) {
@@ -181,5 +191,4 @@ double TrajectoryNLP::SolveIteratively(double w_inf, const Constraints &constrai
   return arg_out.front()->at(0);
 }
 
-
-}
+}  // namespace cartesian_planner
