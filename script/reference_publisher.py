@@ -48,7 +48,7 @@ def generate_center_line(config, start_x=0.0, start_y=0.0, start_yaw=0.0, resolu
             yc = y + radius * np.sin(center_yaw)
 
             point_count = np.floor(np.abs(arc_length) / resolution)
-            angles = np.linspace(start_angle, end_angle, point_count)
+            angles = np.linspace(int(start_angle), int(end_angle), int(point_count))
 
             yaw_inc = angle / point_count
 
