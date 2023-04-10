@@ -147,7 +147,7 @@ def generate_random_dynamic_vehicles(center_line, count, horizon=16.0, dt=0.1):
 
         traj_len = int(horizon / dt)
         s_ind = np.linspace(start_s_ind, bisect.bisect_left(cls, min(max_s, start_s + velocities[i] * horizon)),
-                            traj_len, dtype=np.int)
+                            traj_len, dtype=np.int_)
 
         rand_lateral = 0.0 if np.random.rand() > 0.5 else -4.0
         traj_x, traj_y = convert_frenet_to_cartesian(ref_center_line[s_ind, :], np.repeat(rand_lateral, traj_len))
